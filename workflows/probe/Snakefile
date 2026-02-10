@@ -1,0 +1,39 @@
+configfile: "config/probe.yaml"
+
+RUN_ID = config["run_id"]
+
+rule all:
+    input:
+        expand("results/{run_id}/{modality}/{tool_id}/probe_metrics.json",
+               run_id=RUN_ID,
+               modality=["DDA", "DIA"],
+               tool_id=[c["tool_id"] for c in config["candidates"]["DDA"]] +
+                      [c["tool_id"] for c in config["candidates"]["DIA"]])
+
+def tool_jobs(modality):
+    return config["candidates"][modality]
+
+rule run_candidate:
+    output:
+        metrics="results/{run_id}/{modality}/{tool_id}/probe_metrics.json"
+    params:
+        preset=lambda wc: next(x["preset"] for x in tool_jobs(wc.modality) if x["tool_id"] == wc.tool_id),
+        mzml=lambda wc: config["inputs"]["dda_mzml"] if wc.modality == "DDA" else config["inputs"]["dia_mzml"],
+        fasta=lambda wc: config["fasta"],
+    shell:
+        r"""
+        mkdir -p $(dirname {output.metrics})
+
+        # TODO: replace stub with actual engine execution + parsing.
+        python workflows/probe/scripts/emit_metrics.py \
+          --tool-id {wildcards.tool_id} \
+          --modality {wildcards.modality} \
+          --preset {params.preset} \
+          --walltime-sec 1 \
+          --max-rss-gb 1 \
+          --exit-code 0 \
+          --peptides 1 \
+          --protein-groups 1 \
+          --fdr-ok true \
+          --out {output.metrics}
+        """

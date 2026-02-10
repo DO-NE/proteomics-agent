@@ -1,0 +1,13 @@
+run_id: "probe_local"
+inputs:
+  dda_mzml: "data/probe/dda1.mzML"
+  dia_mzml: "data/probe/dia1.mzML"
+fasta: "data/db/metaproteomics.fasta"
+
+candidates:
+  DDA:
+    - tool_id: "dda_msfragger_philosopher"
+      preset: "dda_tryptic_lfq_default"
+  DIA:
+    - tool_id: "dia_diann"
+      preset: "dia_library_free_default"

@@ -1,0 +1,19 @@
+# outputs / caches
+workflows/probe/results/
+results/
+.tmp/
+.snakemake/
+
+# data (keep large files out of git)
+data/
+*.mzML
+*.mzml
+*.fasta
+*.fa
+*.raw
+*.RAW
+
+# python
+__pycache__/
+*.pyc
+.venv/
