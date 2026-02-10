@@ -4,11 +4,18 @@ RUN_ID = config["run_id"]
 
 rule all:
     input:
-        expand("results/{run_id}/{modality}/{tool_id}/probe_metrics.json",
-               run_id=RUN_ID,
-               modality=["DDA", "DIA"],
-               tool_id=[c["tool_id"] for c in config["candidates"]["DDA"]] +
-                      [c["tool_id"] for c in config["candidates"]["DIA"]])
+        # DDA targets
+        expand(
+            "results/{run_id}/DDA/{tool_id}/probe_metrics.json",
+            run_id=RUN_ID,
+            tool_id=[c["tool_id"] for c in config["candidates"]["DDA"]],
+        ) +
+        # DIA targets
+        expand(
+            "results/{run_id}/DIA/{tool_id}/probe_metrics.json",
+            run_id=RUN_ID,
+            tool_id=[c["tool_id"] for c in config["candidates"]["DIA"]],
+        )
 
 def tool_jobs(modality):
     return config["candidates"][modality]
@@ -29,6 +36,8 @@ rule run_candidate:
           --tool-id {wildcards.tool_id} \
           --modality {wildcards.modality} \
           --preset {params.preset} \
+          --mzml {params.mzml} \
+          --fasta {params.fasta} \
           --walltime-sec 1 \
           --max-rss-gb 1 \
           --exit-code 0 \
