@@ -31,18 +31,13 @@ rule run_candidate:
         r"""
         mkdir -p $(dirname {output.metrics})
 
-        # TODO: replace stub with actual engine execution + parsing.
-        python workflows/probe/scripts/emit_metrics.py \
+        python workflows/probe/scripts/dispatch_tool.py \
+          --registry registry/tool_registry.yaml \
           --tool-id {wildcards.tool_id} \
           --modality {wildcards.modality} \
           --preset {params.preset} \
           --mzml {params.mzml} \
           --fasta {params.fasta} \
-          --walltime-sec 1 \
-          --max-rss-gb 1 \
-          --exit-code 0 \
-          --peptides 1 \
-          --protein-groups 1 \
-          --fdr-ok true \
+          --emit-metrics workflows/probe/scripts/emit_metrics.py \
           --out {output.metrics}
         """

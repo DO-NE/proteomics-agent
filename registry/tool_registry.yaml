@@ -1,0 +1,10 @@
+version: 0.1
+
+tools:
+  dda_msfragger_philosopher:
+    modality: DDA
+    wrapper: workflows/probe/wrappers/mock_run.sh
+
+  dia_diann:
+    modality: DIA
+    wrapper: workflows/probe/wrappers/mock_run.sh
