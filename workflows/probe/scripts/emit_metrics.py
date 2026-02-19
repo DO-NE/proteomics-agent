@@ -14,6 +14,8 @@ p.add_argument("--peptides", type=int, required=True)
 p.add_argument("--protein-groups", type=int, required=True)
 p.add_argument("--fdr-ok", required=True)
 p.add_argument("--out", required=True)
+p.add_argument("--mzml", required=False, default="")
+p.add_argument("--fasta", required=False, default="")
 args = p.parse_args()
 
 obj = {
@@ -30,7 +32,12 @@ obj = {
   },
   "qc": {
     "fdr_ok": parse_bool(args.fdr_ok)
-  }
+  },
+  "inputs": {
+    "mzml": args.mzml,
+    "fasta": args.fasta
+  },
+  "preset": args.preset,
 }
 
 with open(args.out, "w") as f:
