@@ -1,0 +1,9 @@
+{
+  "dataset_id": "probe_local",
+  "modalities": ["DDA", "DIA"],
+  "instrument": {"vendor": "unknown", "model": "unknown"},
+  "files": {"n_files": 2, "formats": ["MZML"], "fractionated": false},
+  "biological_context": {"metaproteomics": true, "estimated_species_complexity": "high"},
+  "constraints": {"max_mem_gb": 64, "max_walltime_hr": 2, "gpu_allowed": false},
+  "user_objectives": {"priority": "balanced"}
+}
