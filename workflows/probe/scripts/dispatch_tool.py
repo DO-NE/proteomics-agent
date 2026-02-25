@@ -2,6 +2,8 @@ import argparse
 import subprocess
 import time
 from pathlib import Path
+import os
+import json
 
 import yaml
 
@@ -21,6 +23,7 @@ def main():
     p.add_argument("--fasta", required=True)
     p.add_argument("--emit-metrics", required=True)
     p.add_argument("--out", required=True)
+    p.add_argument("--tool-env-json", required=False, default="{}")
     args = p.parse_args()
 
     registry = load_registry(Path(args.registry))
@@ -30,18 +33,34 @@ def main():
 
     entry = tools[args.tool_id]
     wrapper = Path(entry["wrapper"])
+    parser = Path(entry["parser"]) if "parser" in entry else None
+
     if not wrapper.exists():
         raise SystemExit(f"wrapper not found: {wrapper}")
+    if parser is not None and not parser.exists():
+        raise SystemExit(f"parser not found: {parser}")
 
-    # Run wrapper with env vars (common pattern for wrappers)
-    env = dict(**{k: v for k, v in dict(**__import__("os").environ).items()})
+    out_path = Path(args.out)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Use a dedicated workdir per tool run (kept next to metrics)
+    workdir = out_path.parent / "workdir"
+    workdir.mkdir(parents=True, exist_ok=True)
+
+    # Run wrapper with env vars
+    env = dict(os.environ)
     env.update({
         "TOOL_ID": args.tool_id,
         "MODALITY": args.modality,
         "PRESET": args.preset,
         "MZML": args.mzml,
         "FASTA": args.fasta,
+        "WORKDIR": str(workdir),
     })
+
+    # Merge per-tool env (from Snakefile --tool-env-json)
+    tool_env = json.loads(args.tool_env_json)
+    env.update({k: str(v) for k, v in tool_env.items()})
 
     start = time.perf_counter()
     proc = subprocess.run(
@@ -56,17 +75,34 @@ def main():
     max_rss_gb = 0.0
     exit_code = proc.returncode
 
-    # Stub IDs for now (real parsers will fill these later)
-    peptides = 1
-    protein_groups = 1
-    fdr_ok = "true" if exit_code == 0 else "false"
-
-    out_path = Path(args.out)
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-
-    # Store wrapper logs next to metrics
+    # Store wrapper logs
     (out_path.parent / "wrapper.stdout.txt").write_text(proc.stdout)
     (out_path.parent / "wrapper.stderr.txt").write_text(proc.stderr)
+
+    # If parser provided, use it to compute peptides/protein_groups/fdr_ok.
+    if parser is not None and exit_code == 0:
+        pres = subprocess.run(
+            ["python", str(parser), "--workdir", str(workdir)],
+            text=True,
+            capture_output=True,
+        )
+        (out_path.parent / "parser.stdout.txt").write_text(pres.stdout)
+        (out_path.parent / "parser.stderr.txt").write_text(pres.stderr)
+
+        if pres.returncode == 0:
+            lines = [ln.strip() for ln in pres.stdout.splitlines() if ln.strip() != ""]
+            if len(lines) >= 3:
+                peptides = int(lines[0])
+                protein_groups = int(lines[1])
+                fdr_ok = lines[2].lower()
+            else:
+                peptides, protein_groups, fdr_ok = 0, 0, "false"
+        else:
+            peptides, protein_groups, fdr_ok = 0, 0, "false"
+    else:
+        peptides = 1 if exit_code == 0 else 0
+        protein_groups = 1 if exit_code == 0 else 0
+        fdr_ok = "true" if exit_code == 0 else "false"
 
     # Emit standardized metrics json
     subprocess.run(

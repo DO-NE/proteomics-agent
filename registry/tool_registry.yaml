@@ -3,7 +3,8 @@ version: 0.1
 tools:
   dda_msfragger_philosopher:
     modality: DDA
-    wrapper: workflows/probe/wrappers/mock_run.sh
+    wrapper: workflows/probe/wrappers/dda_msfragger_philosopher.sh
+    parser: workflows/probe/parsers/msfragger_parser.py
 
   dia_diann:
     modality: DIA

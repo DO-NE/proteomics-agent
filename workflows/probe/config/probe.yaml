@@ -2,7 +2,7 @@ run_id: "probe_local"
 inputs:
   dda_mzml: "data/probe/dda1.mzML"
   dia_mzml: "data/probe/dia1.mzML"
-fasta: "data/db/metaproteomics.fasta"
+fasta: "data/db/human_proteome.fasta"
 
 candidates:
   DDA:
@@ -11,3 +11,9 @@ candidates:
   DIA:
     - tool_id: "dia_diann"
       preset: "dia_library_free_default"
+
+tool_env:
+  dda_msfragger_philosopher:
+    MSFRAGGER_JAR: "/home/dkwak/tools/msfragger/MSFragger-4.4.1/MSFragger-4.4.1.jar"
+    PHILOSOPHER_BIN: "/home/dkwak/tools/philosopher/bin/philosopher"
+    JAVA_BIN: "java"

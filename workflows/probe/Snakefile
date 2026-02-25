@@ -1,3 +1,5 @@
+import json
+
 configfile: "config/probe.yaml"
 
 RUN_ID = config["run_id"]
@@ -27,6 +29,8 @@ rule run_candidate:
         preset=lambda wc: next(x["preset"] for x in tool_jobs(wc.modality) if x["tool_id"] == wc.tool_id),
         mzml=lambda wc: config["inputs"]["dda_mzml"] if wc.modality == "DDA" else config["inputs"]["dia_mzml"],
         fasta=lambda wc: config["fasta"],
+        # NEW: per-tool env injection (from probe.yaml)
+        tool_env_json=lambda wc: json.dumps(config.get("tool_env", {}).get(wc.tool_id, {})),
     shell:
         r"""
         mkdir -p $(dirname {output.metrics})
@@ -36,6 +40,7 @@ rule run_candidate:
           --tool-id {wildcards.tool_id} \
           --modality {wildcards.modality} \
           --preset {params.preset} \
+          --tool-env-json '{params.tool_env_json}' \
           --mzml {params.mzml} \
           --fasta {params.fasta} \
           --emit-metrics workflows/probe/scripts/emit_metrics.py \
