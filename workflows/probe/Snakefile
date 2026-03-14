@@ -6,17 +6,15 @@ RUN_ID = config["run_id"]
 
 rule all:
     input:
-        # DDA targets
         expand(
             "results/{run_id}/DDA/{tool_id}/probe_metrics.json",
             run_id=RUN_ID,
-            tool_id=[c["tool_id"] for c in config["candidates"]["DDA"]],
+            tool_id=[c["tool_id"] for c in config.get("candidates", {}).get("DDA", [])],
         ) +
-        # DIA targets
         expand(
             "results/{run_id}/DIA/{tool_id}/probe_metrics.json",
             run_id=RUN_ID,
-            tool_id=[c["tool_id"] for c in config["candidates"]["DIA"]],
+            tool_id=[c["tool_id"] for c in config.get("candidates", {}).get("DIA", [])],
         )
 
 def tool_jobs(modality):
