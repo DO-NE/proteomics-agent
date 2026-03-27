@@ -30,7 +30,9 @@ def main():
 
     for pipe in reg["pipelines"]:
         pid = pipe["pipeline_id"]
-        metrics_file = results_root / pid / "pipeline_metrics.json"
+        metrics_file = results_root / pid / "canonical" / "pipeline_metrics.json"
+        if not metrics_file.exists():
+            metrics_file = results_root / pid / "pipeline_metrics.json"
         if not metrics_file.exists():
             continue
 
