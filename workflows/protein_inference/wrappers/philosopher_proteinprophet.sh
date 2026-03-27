@@ -12,6 +12,8 @@ SEARCH_SUBDIR="${1:?Need search subdir name, e.g. msfragger/comet}"
 SEARCH_DIR="${WORKDIR}/${SEARCH_SUBDIR}"
 OUT_DIR="${WORKDIR}/proteinprophet"
 mkdir -p "${OUT_DIR}"
+SENTINEL_NO_DATA="${OUT_DIR}/NO_PROTEINPROPHET_DATA"
+rm -f "${SENTINEL_NO_DATA}"
 
 pushd "${OUT_DIR}" >/dev/null
 
@@ -74,18 +76,30 @@ shopt -u nullglob
 
 if [[ ${#combined_xmls[@]} -gt 0 ]]; then
     echo "[ProteinProphet] Input: ${combined_xmls[*]}"
-    "${PHILOSOPHER_BIN}" proteinprophet "${combined_xmls[@]}"
+    if ! grep -q "peptideprophet_result" "${combined_xmls[0]}"; then
+        echo "WARNING: PeptideProphet output contains no peptideprophet_result entries; skipping ProteinProphet." >&2
+        touch "${SENTINEL_NO_DATA}"
+    else
+        "${PHILOSOPHER_BIN}" proteinprophet "${combined_xmls[@]}"
+    fi
 elif [[ ${#interact_xmls[@]} -gt 0 ]]; then
     echo "[ProteinProphet] Input: ${interact_xmls[*]}"
-    "${PHILOSOPHER_BIN}" proteinprophet "${interact_xmls[@]}"
+    if ! grep -q "peptideprophet_result" "${interact_xmls[0]}"; then
+        echo "WARNING: PeptideProphet output contains no peptideprophet_result entries; skipping ProteinProphet." >&2
+        touch "${SENTINEL_NO_DATA}"
+    else
+        "${PHILOSOPHER_BIN}" proteinprophet "${interact_xmls[@]}"
+    fi
 else
     echo "ERROR: No combined/interact pepXML found after PeptideProphet" >&2
     exit 1
 fi
 
-# Filter and report
-"${PHILOSOPHER_BIN}" filter --psm 0.01 --pep 0.01 --prt 0.01 || true
-"${PHILOSOPHER_BIN}" report || true
+# Filter and report (skip if ProteinProphet was intentionally skipped for empty input)
+if [[ ! -f "${SENTINEL_NO_DATA}" ]]; then
+    "${PHILOSOPHER_BIN}" filter --psm 0.01 --pep 0.01 --prt 0.01 || true
+    "${PHILOSOPHER_BIN}" report || true
+fi
 
 popd >/dev/null
 

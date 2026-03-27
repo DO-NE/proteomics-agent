@@ -15,44 +15,47 @@ def main():
     args = p.parse_args()
 
     pp_dir = Path(args.workdir) / "proteinprophet"
+    sentinel = pp_dir / "NO_PROTEINPROPHET_DATA"
     prot_xmls = sorted(list(pp_dir.glob("*.prot.xml")) + list(pp_dir.glob("*.protXML")))
-
-    if not prot_xmls:
-        raise FileNotFoundError(f"No ProteinProphet prot.xml found in {pp_dir}")
-
-    prot_xml = prot_xmls[0]
-    tree = ET.parse(prot_xml)
-    root = tree.getroot()
 
     rows = []
     group_id = 0
 
-    for elem in root.iter():
-        if not tag_endswith(elem, "protein_group"):
-            continue
+    if sentinel.exists():
+        print(f"[WARN] ProteinProphet skipped due to empty PeptideProphet output: {sentinel}")
+    elif not prot_xmls:
+        raise FileNotFoundError(f"No ProteinProphet prot.xml found in {pp_dir}")
+    else:
+        prot_xml = prot_xmls[0]
+        tree = ET.parse(prot_xml)
+        root = tree.getroot()
 
-        group_id += 1
-        representative_protein = ""
-        proteins = []
-        probability = elem.attrib.get("probability", "")
+        for elem in root.iter():
+            if not tag_endswith(elem, "protein_group"):
+                continue
 
-        for child in elem.iter():
-            if tag_endswith(child, "protein"):
-                name = child.attrib.get("protein_name", "")
-                if not representative_protein:
-                    representative_protein = name
-                if name:
-                    proteins.append(name)
+            group_id += 1
+            representative_protein = ""
+            proteins = []
+            probability = elem.attrib.get("probability", "")
 
-        rows.append({
-            "protein_group_id": f"PG{group_id}",
-            "representative_protein": representative_protein,
-            "proteins": ";".join(sorted(set(proteins))),
-            "n_psms": "",
-            "n_unique_peptides": "",
-            "protein_probability": probability,
-            "inference_method": "proteinprophet",
-        })
+            for child in elem.iter():
+                if tag_endswith(child, "protein"):
+                    name = child.attrib.get("protein_name", "")
+                    if not representative_protein:
+                        representative_protein = name
+                    if name:
+                        proteins.append(name)
+
+            rows.append({
+                "protein_group_id": f"PG{group_id}",
+                "representative_protein": representative_protein,
+                "proteins": ";".join(sorted(set(proteins))),
+                "n_psms": "",
+                "n_unique_peptides": "",
+                "protein_probability": probability,
+                "inference_method": "proteinprophet",
+            })
 
     out_path = Path(args.out)
     out_path.parent.mkdir(parents=True, exist_ok=True)
