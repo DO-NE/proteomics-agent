@@ -1,4 +1,4 @@
-version: 0.1
+version: 0.2
 
 tools:
   dda_msfragger_philosopher:
@@ -6,6 +6,32 @@ tools:
     wrapper: workflows/probe/wrappers/dda_msfragger_philosopher.sh
     parser: workflows/probe/parsers/msfragger_parser.py
 
-  dia_diann:
-    modality: DIA
-    wrapper: workflows/probe/wrappers/mock_run.sh
+  dda_comet:
+    modality: DDA
+    wrapper: workflows/search/wrappers/dda_comet.sh
+    parser: workflows/search/parsers/comet_to_peptide_hits.py
+
+  dda_msgfplus:
+    modality: DDA
+    wrapper: workflows/search/wrappers/dda_msgfplus.sh
+    parser: workflows/search/parsers/msgfplus_to_peptide_hits.py
+
+protein_inference:
+  philosopher_proteinprophet:
+    wrapper: workflows/protein_inference/wrappers/philosopher_proteinprophet.sh
+    parser: workflows/protein_inference/parsers/proteinprophet_to_groups.py
+
+  metalp:
+    build_inputs: workflows/protein_inference/adapters/metalp_build_inputs.py
+    adapter: workflows/protein_inference/adapters/metalp_adapter.py
+    parser: workflows/protein_inference/parsers/metalp_to_groups.py
+
+taxon_inference:
+  unipept_lca:
+    adapter: workflows/taxon_inference/adapters/unipept_lca.py
+    parser: workflows/taxon_inference/parsers/unipept_to_composition.py
+
+  proteoclade:
+    prepare_inputs: workflows/taxon_inference/adapters/proteoclade_prepare_psm_table.py
+    adapter: workflows/taxon_inference/adapters/proteoclade_adapter.py
+    parser: workflows/taxon_inference/parsers/proteoclade_to_composition.py

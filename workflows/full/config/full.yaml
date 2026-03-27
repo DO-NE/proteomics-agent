@@ -1,0 +1,28 @@
+run_id: "pxd028735_full"
+mzml: "/mnt/data3/PXD028735/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01.mzML"
+fasta: "/mnt/data3/PXD028735/PXD028735.fasta"
+truth: "profiles/benchmark_truths/PXD028735_condition_A.json"
+
+tool_env:
+  dda_msfragger_philosopher:
+    MSFRAGGER_JAR: "/home/dkwak/tools/msfragger/MSFragger-4.4.1/MSFragger-4.4.1.jar"
+    PHILOSOPHER_BIN: "/home/dkwak/tools/philosopher/bin/philosopher"
+    JAVA_BIN: "java"
+
+  philosopher_proteinprophet:
+    PHILOSOPHER_BIN: "/home/dkwak/tools/philosopher/bin/philosopher"
+
+  dda_comet:
+    COMET_BIN: "/home/dkwak/tools/comet/comet.linux.exe"
+
+  dda_msgfplus:
+    MSGFPLUS_JAR: "/home/dkwak/tools/msgfplus/MSGFPlus.jar"
+    JAVA_BIN: "java"
+
+  metalp:
+    METALP_SCRIPT: "/home/dkwak/tools/MetaLP/LP2_species_V2.py"
+
+  proteoclade:
+    PROTEOCLADE_PCDB: "/home/dkwak/tools/proteoclade_assets/pxd028735.pcdb"
+    PROTEOCLADE_PCTAXA: "/home/dkwak/tools/proteoclade_assets/latest.pctaxa"
+    PROTEOCLADE_THREADS: 6

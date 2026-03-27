@@ -1,0 +1,36 @@
+pipelines:
+  - pipeline_id: msfragger_prophet_unipept
+    modality: DDA
+    search_engine: dda_msfragger_philosopher
+    protein_inference: philosopher_proteinprophet
+    taxon_inference: unipept_lca
+
+  - pipeline_id: comet_prophet_unipept
+    modality: DDA
+    search_engine: dda_comet
+    protein_inference: philosopher_proteinprophet
+    taxon_inference: unipept_lca
+
+  - pipeline_id: msgfplus_prophet_unipept
+    modality: DDA
+    search_engine: dda_msgfplus
+    protein_inference: philosopher_proteinprophet
+    taxon_inference: unipept_lca
+
+  # - pipeline_id: msfragger_metalp_proteoclade
+  #   modality: DDA
+  #   search_engine: dda_msfragger_philosopher
+  #   protein_inference: metalp
+  #   taxon_inference: proteoclade
+
+  # - pipeline_id: comet_metalp_proteoclade
+  #   modality: DDA
+  #   search_engine: dda_comet
+  #   protein_inference: metalp
+  #   taxon_inference: proteoclade
+
+  # - pipeline_id: msgfplus_metalp_proteoclade
+  #   modality: DDA
+  #   search_engine: dda_msgfplus
+  #   protein_inference: metalp
+  #   taxon_inference: proteoclade
